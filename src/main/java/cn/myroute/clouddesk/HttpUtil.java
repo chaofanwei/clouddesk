@@ -7,24 +7,31 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
+import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.http.Consts;
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
+import org.apache.http.entity.mime.HttpMultipartMode;
+import org.apache.http.entity.mime.MIME;
+import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 
 public class HttpUtil {
@@ -85,18 +92,29 @@ public class HttpUtil {
 
 			HttpPost httpPost = new HttpPost(url);
 
+			ContentType contentType= ContentType.create(HTTP.OCTET_STREAM_TYPE, HTTP.UTF_8);
+			
 			// 把文件转换成流对象FileBody
-			FileBody bin = new FileBody(localFile);
-			if (remotePath == null || remotePath.isEmpty()) {
+			FileBody bin = new FileBody(localFile,contentType,URLEncoder.encode(localFile.getName()));
+			
+			
+			if (remotePath == null || remotePath.isEmpty() || remotePath.equals("/")) {
 				remotePath = "desktop";
 			}else{
 				remotePath = "desktop" + remotePath;
 			}
+		//	System.out.println(remotePath);
 			StringBody p = new StringBody(remotePath, ContentType.create(
 					"text/plain", Consts.UTF_8));
 
+			
+			
 			HttpEntity reqEntity = MultipartEntityBuilder.create()
-					.addPart("file", bin).addPart("p", p).build();
+					.setMode(HttpMultipartMode.BROWSER_COMPATIBLE)
+				//	.setCharset(Charset.forName("utf-8"))
+					.addPart("file", bin)
+					.addPart("p", p)
+					.build();
 
 			httpPost.setEntity(reqEntity);
 
@@ -105,6 +123,14 @@ public class HttpUtil {
 			// 获取响应对象
 			HttpEntity resEntity = response.getEntity();
 
+			if(null != resEntity){
+				String res = IOUtils.toString(resEntity.getContent());
+				if(res.startsWith("Error:")){
+					System.out.println(res);
+					return false;
+				}
+				
+			}
 			// 销毁
 			EntityUtils.consume(resEntity);
 			return true;

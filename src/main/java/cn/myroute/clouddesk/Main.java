@@ -9,7 +9,7 @@ public class Main {
 
 	public static void main(String[] args) {
 		try {
-			args = new String[]{"down"};
+			args = new String[]{"up"};
 			if(args.length > 0 ){
 				if("up".equals(args[0])){
 					ConfigUtil.init();
@@ -32,8 +32,8 @@ public class Main {
 		System.out.println("begin download");
 		List<String> lines = HttpUtil.executeGet(ConfigUtil.listUrl);
 		for(String line:lines){
-			String[] temp = line.split(" ");
-			if(temp.length == 2){
+			String[] temp = line.split("|");
+			if(temp.length == 3){
 				String remoteFile = temp[0];
 				String remoteFileMd5= temp[1];
 				String localPath = getLoalPath(remoteFile);
@@ -70,8 +70,8 @@ public class Main {
 		System.out.println("begin upload");
 		List<String> lines = HttpUtil.executeGet(ConfigUtil.listUrl);
 		for(String line:lines){
-			String[] temp = line.split(" ");
-			if(temp.length == 2){
+			String[] temp = line.split("\\|");
+			if(temp.length == 3){
 				String remoteFile = temp[0];
 				String remoteFileMd5= temp[1];
 				listMap.put(remoteFile, remoteFileMd5);
@@ -84,7 +84,7 @@ public class Main {
 			File localFile = new File(local);
 			uploadFile(localFile, remote, local);
 		}
-		System.out.println("begin upload");
+		System.out.println("end upload");
 	}
 	
 	static void uploadFile(File localFile,String key,String value) throws Exception{
