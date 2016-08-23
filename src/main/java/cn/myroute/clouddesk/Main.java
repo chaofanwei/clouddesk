@@ -10,7 +10,7 @@ public class Main {
 
 	public static void main(String[] args) {
 		try {
-			args = new String[]{"down"};
+			//args = new String[]{"down"};
 			if(args.length > 0 ){
 				if("up".equals(args[0])){
 					ConfigUtil.init();
