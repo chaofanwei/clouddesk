@@ -1,6 +1,7 @@
 package cn.myroute.clouddesk;
 
 import java.io.File;
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,7 +10,7 @@ public class Main {
 
 	public static void main(String[] args) {
 		try {
-			args = new String[]{"up"};
+			args = new String[]{"down"};
 			if(args.length > 0 ){
 				if("up".equals(args[0])){
 					ConfigUtil.init();
@@ -32,7 +33,7 @@ public class Main {
 		System.out.println("begin download");
 		List<String> lines = HttpUtil.executeGet(ConfigUtil.listUrl);
 		for(String line:lines){
-			String[] temp = line.split("|");
+			String[] temp = line.split("\\|");
 			if(temp.length == 3){
 				String remoteFile = temp[0];
 				String remoteFileMd5= temp[1];
@@ -43,7 +44,7 @@ public class Main {
 					String localMd5 = MD5Util.getFileMD5String(f);
 					if(localMd5.equalsIgnoreCase(remoteFileMd5)) continue;
 				}
-				boolean res = HttpUtil.download(ConfigUtil.downUrl + remoteFile, localPath);
+				boolean res = HttpUtil.download(ConfigUtil.downUrl + URLEncoder.encode(remoteFile), localPath);
 				if(!res){
 					System.err.println("download failed ! " + remoteFile + " ->" + localPath);
 					System.exit(-1);
