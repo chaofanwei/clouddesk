@@ -161,7 +161,7 @@ public class HttpUtil {
 		FileOutputStream out = null;
 		boolean suc = false;
 		try {
-			System.out.println("begin download :" + url);
+			//System.out.println("begin download :" + url);
 			HttpClient client = new DefaultHttpClient();
 			HttpGet request = new HttpGet();
 			request.setURI(new URI(url));
