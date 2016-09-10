@@ -13,6 +13,7 @@ public class ConfigUtil {
 	static String uploadUrl;
 	static String listUrl;
 	static String downUrl;
+	static String delUrl;
 	static String[] urls;
 	static Map<String, String> map = new HashMap<String, String>();
 	
@@ -22,6 +23,7 @@ public class ConfigUtil {
 			listUrl = properties.getProperty("listUrl");
 			uploadUrl = properties.getProperty("uploadUrl");
 			downUrl = properties.getProperty("downUrl");
+			delUrl = properties.getProperty("delUrl");
 			initMap();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

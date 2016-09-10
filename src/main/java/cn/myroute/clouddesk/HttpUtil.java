@@ -36,7 +36,7 @@ import org.apache.http.util.EntityUtils;
 
 public class HttpUtil {
 
-	public static List<String> executeGet(String url) {
+	public static List<String> executeGet(String url) throws Exception {
 		BufferedReader in = null;
 		List<String> lines = new LinkedList<String>();
 		try {
@@ -57,6 +57,7 @@ public class HttpUtil {
 			in.close();
 		}catch(Exception e){
 			e.printStackTrace();
+			throw e;
 		}finally {
 			if (in != null) {
 				try {
@@ -67,6 +68,7 @@ public class HttpUtil {
 			}
 		}
 		lines = parse(lines);
+		if(lines.size() <= 0 ) throw new RuntimeException("get list size 0");
 		return lines;
 	}
 	
@@ -75,7 +77,7 @@ public class HttpUtil {
 		for(String line:pre){
 			String[] ll = line.split("<br/>");
 			for(String l:ll){
-				if(l.contains("/desktop")){
+				if(l.contains("/desktop/")){
 					result.add(l.trim().replace("/desktop", ""));
 				}
 			}
@@ -84,6 +86,55 @@ public class HttpUtil {
 		return result;
 	}
 
+	public static boolean delRemote( String remotePath) {
+		CloseableHttpClient httpClient = null;
+		CloseableHttpResponse response = null;
+		try {
+			httpClient = HttpClients.createDefault();
+			if (remotePath == null || remotePath.isEmpty() || remotePath.equals("/")) {
+				remotePath = "desktop";
+			}else{
+				remotePath = "desktop" + remotePath;
+			}
+//			System.out.println("remote:"+remotePath);
+//			System.out.println("remoteurl :"+ConfigUtil.delUrl + URLEncoder.encode(remotePath));
+			
+			HttpPost httpPost = new HttpPost(ConfigUtil.delUrl + URLEncoder.encode(remotePath));
+			response = httpClient.execute(httpPost);
+			HttpEntity resEntity = response.getEntity();
+			if(null != resEntity){
+				String res = IOUtils.toString(resEntity.getContent());
+				//System.out.println(res);
+				if(res.startsWith("Error:")){
+					System.out.println(res);
+					return false;
+				}
+				
+			}
+			// 销毁
+			EntityUtils.consume(resEntity);
+			return true;
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				if (response != null) {
+					response.close();
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			
+			try {
+				if (httpClient != null) {
+					httpClient.close();
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		return false;
+	}
 	public static boolean upload(String url, File localFile, String remotePath) {
 		CloseableHttpClient httpClient = null;
 		CloseableHttpResponse response = null;
